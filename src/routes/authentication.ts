@@ -4,14 +4,16 @@ import UsersDB from '../db/usersDB';
 import AuthenticationHelper from '../helpers/authenticationHelper';
 import AuthenticatedRequest from "../interfaces/authenticatedRequest";
 import AuthenticationMiddleWare from "../middleware/authenticationMiddleWare";
+import Validator from './../validator';
 
 class Authentication {
 	router: Router;
 	constructor() {
 		this.router = express.Router();
+		this.router.get("/status", AuthenticationMiddleWare(), this.checkAuthenticationStatus);
+		this.router.post("/signup", this.signUp);
 		this.router.post("/", this.authenticate);
 		this.router.post("/logout", this.logout);
-		this.router.get("/status", AuthenticationMiddleWare(), this.checkAuthenticationStatus);
 	}
 
 	checkAuthenticationStatus = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
@@ -53,6 +55,32 @@ class Authentication {
 
 	logout = (req: Request, res: Response, next: NextFunction) => {
 		res.clearCookie("authToken");
+		res.send();
+	}
+
+	signUp = (req: Request, res: Response, next: NextFunction) => {
+		let newUser = req.body;
+		let userErrors = Validator.validateNewUser(newUser);
+
+		if (Object.keys(userErrors).length) {
+			res.status(StatusCodes.BAD_REQUEST).send({
+				errorType: "validationError",
+				message: userErrors
+			});
+			return;
+		}
+
+		let user = UsersDB.getUser(newUser.userName);
+		if (user) {
+			res.status(StatusCodes.BAD_REQUEST).send({
+				errorType: "userNameError",
+				message: "Username already exist!"
+			});
+			return;
+		}
+
+		const { userName, ...userInfo } = newUser;
+		UsersDB.addUser(userName, userInfo);
 		res.send();
 	}
 }
