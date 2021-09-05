@@ -18,16 +18,16 @@ class ExpressServer {
 	}
 
 	configureMiddleware = () => {
-		// parse application/x-www-form-urlencoded
+		// Parse application/x-www-form-urlencoded
 		this.app.use(bodyParser.urlencoded({ extended: false }));
 
-		// parse application/json
+		// Parse application/json
 		this.app.use(bodyParser.json());
 
-		// parse cookies		
+		// Parse cookies		
 		this.app.use(cookieParser());
 
-		// cors		
+		// CORS		
 		this.app.use(cors());
 
 		// Log requests for auditing purpose
