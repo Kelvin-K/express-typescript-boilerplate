@@ -11,7 +11,7 @@ const AuthenticationMiddleWare = () => {
 			return;
 		}
 
-		let userInfo: any = await AuthenticationHelper.decryptContent(cookies.authToken);
+		let userInfo: any = await AuthenticationHelper.decodeAuthToken(cookies.authToken);
 		if (!userInfo) {
 			res.status(StatusCodes.UNAUTHORIZED).send(ReasonPhrases.UNAUTHORIZED);
 			return;

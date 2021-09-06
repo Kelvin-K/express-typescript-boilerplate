@@ -4,6 +4,7 @@ import UsersDB from '../db/usersDB';
 import AuthenticationHelper from '../helpers/authenticationHelper';
 import AuthenticatedRequest from "../interfaces/authenticatedRequest";
 import AuthenticationMiddleWare from "../middleware/authenticationMiddleWare";
+import EncryptionHelper from './../helpers/encryptionHelper';
 import Validator from './../validator';
 
 class Authentication {
@@ -38,13 +39,13 @@ class Authentication {
 			return;
 		}
 
-		if (user.password !== password) {
+		let currentPassword = await EncryptionHelper.decryptContent(user.password, process.env.ENCRYPTION_KEY);
+		if (currentPassword !== password) {
 			res.status(StatusCodes.UNAUTHORIZED).send(ReasonPhrases.UNAUTHORIZED);
 			return;
 		}
 
-		let authToken = await AuthenticationHelper.encryptContent({ userName });
-
+		let authToken = await AuthenticationHelper.getAuthToken({ userName });
 		res.cookie("authToken", authToken, { httpOnly: true, secure: true });
 		res.status(StatusCodes.OK)
 			.send({
@@ -58,7 +59,7 @@ class Authentication {
 		res.send();
 	}
 
-	signUp = (req: Request, res: Response, next: NextFunction) => {
+	signUp = async (req: Request, res: Response, next: NextFunction) => {
 		let newUser = req.body;
 		let userErrors = Validator.validateNewUser(newUser);
 
@@ -80,6 +81,9 @@ class Authentication {
 		}
 
 		const { userName, ...userInfo } = newUser;
+
+		userInfo.password = await EncryptionHelper.encryptContent(userInfo.password, process.env.ENCRYPTION_KEY);
+
 		UsersDB.addUser(userName, userInfo);
 		res.send();
 	}

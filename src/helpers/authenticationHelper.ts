@@ -1,43 +1,20 @@
-import * as jwt from "jsonwebtoken";
+import EncryptionHelper from "./encryptionHelper";
 
 class AuthenticationHelper {
-	static encryptContent = (content: any) => {
+	static getAuthToken = async (content: any) => {
 		let newContent = {
 			publicKey: process.env.PUBLIC_KEY,
 			content: content
 		};
-		return new Promise((resolve, reject) => {
-			jwt.sign(
-				JSON.stringify(newContent),
-				process.env.PRIVATE_KEY,
-				{ algorithm: 'HS256' },
-				(err, token) => {
-					if (err)
-						reject(err);
-					else
-						resolve(token);
-				}
-			);
-		});
+		return await EncryptionHelper.encryptContent(newContent, process.env.PRIVATE_KEY);
 	}
 
-	static decryptContent = (token: string) => {
-		return new Promise((resolve, reject) => {
-			jwt.verify(
-				token,
-				process.env.PRIVATE_KEY,
-				function (err, decoded) {
-					if (err)
-						reject(err);
-					else {
-						if (!decoded || !decoded.publicKey || decoded.publicKey !== process.env.PUBLIC_KEY)
-							reject("Invalid token.");
-						else
-							resolve(decoded.content);
-					}
-				}
-			);
-		});
+	static decodeAuthToken = async (token: string) => {
+		let decodedToken: any = await EncryptionHelper.decryptContent(token, process.env.PRIVATE_KEY);
+		if (!decodedToken || !decodedToken.publicKey || decodedToken.publicKey !== process.env.PUBLIC_KEY)
+			throw new Error("Invalid token.");
+
+		return decodedToken.content;
 	}
 }
 
