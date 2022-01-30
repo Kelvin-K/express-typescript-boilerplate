@@ -2,23 +2,30 @@ import express, { NextFunction, Request, Response, Router } from "express";
 import { ReasonPhrases, StatusCodes } from 'http-status-codes';
 import UsersDB from '../db/usersDB';
 import AuthenticationHelper from '../helpers/authenticationHelper';
-import AuthenticatedRequest from "../interfaces/authenticatedRequest";
 import AuthenticationMiddleWare from "../middleware/authenticationMiddleWare";
 import EncryptionHelper from './../helpers/encryptionHelper';
+import UserRequest from './../interfaces/userRequest';
 import Validator from './../validator';
 
 class Authentication {
+
 	router: Router;
+
 	constructor() {
 		this.router = express.Router();
-		this.router.get("/status", AuthenticationMiddleWare(), this.checkAuthenticationStatus);
+		this.router.get("/status", AuthenticationMiddleWare(), this.getUser, this.checkAuthenticationStatus);
 		this.router.post("/signup", this.signUp);
 		this.router.post("/", this.authenticate);
 		this.router.post("/logout", this.logout);
 	}
 
-	checkAuthenticationStatus = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
-		let user = UsersDB.getUser(req.userName);
+	getUser = (req: UserRequest, res: Response, next: NextFunction) => {
+		req.user = UsersDB.getUser(req.userName);
+		next();
+	}
+
+	checkAuthenticationStatus = (req: UserRequest, res: Response, next: NextFunction) => {
+		let user = req.user;
 		if (!user) {
 			res.status(StatusCodes.UNAUTHORIZED).send(ReasonPhrases.UNAUTHORIZED);
 			return;

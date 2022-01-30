@@ -4,6 +4,7 @@ import AuthenticationHelper from '../helpers/authenticationHelper';
 import AuthenticatedRequest from '../interfaces/authenticatedRequest';
 
 const AuthenticationMiddleWare = () => {
+
 	return async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
 		let cookies = req.cookies;
 		if (!cookies || !cookies.authToken) {

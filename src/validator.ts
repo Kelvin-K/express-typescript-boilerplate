@@ -1,4 +1,5 @@
 class Validator {
+
 	static validateNewUser = (userInfo: any): { [property: string]: string } => {
 		let errors: { [property: string]: string } = {};
 		const { userName, password } = userInfo;

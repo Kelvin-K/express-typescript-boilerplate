@@ -1,6 +1,7 @@
 import EncryptionHelper from "./encryptionHelper";
 
 class AuthenticationHelper {
+
 	static getAuthToken = async (content: any) => {
 		let newContent = {
 			publicKey: process.env.PUBLIC_KEY,

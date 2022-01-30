@@ -1,7 +1,9 @@
 import express, { NextFunction, Request, Response, Router } from "express";
 
 class HealthCheck {
+
 	router: Router;
+
 	constructor() {
 		this.router = express.Router();
 		this.router.get("/", this.getHealthCheck);

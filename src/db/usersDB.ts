@@ -1,6 +1,7 @@
 import db from './db';
 
 class UsersDB {
+
 	static getUser = (userName: string) => {
 		let user;
 		try { user = db.getData(`/users/${userName}`); } catch { }

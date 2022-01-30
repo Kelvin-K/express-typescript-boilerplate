@@ -1,6 +1,7 @@
 import * as jwt from "jsonwebtoken";
 
 class EncryptionHelper {
+
 	static encryptContent = (content: any, secret: string) => {
 		return new Promise((resolve, reject) => {
 			jwt.sign(
